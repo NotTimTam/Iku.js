@@ -74,6 +74,18 @@ class Builder {
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>${settings.name ? settings.name : "Unnamed Game"}</title>
+
+            ${
+				settings.pixelPerfect &&
+				`
+                <style>
+                    canvas {
+                        image-rendering: pixelated;
+                        image-rendering: crisp-edges;
+                    }
+                </style>
+            `
+			}
         </head>
         <body>
             <script src="./game.js"></script>
