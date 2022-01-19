@@ -82,10 +82,9 @@ class Builder {
 			}
         </head>
         <body>
+			<script src="./math.js"></script>
+			<script src="./render.js"></script>
             <script src="./game.js"></script>
-            <script src="./math.js"></script>
-            <script src="./render.js"></script>
-
             ${customCodeImports}
         </body>
         </html>`;

@@ -105,6 +105,12 @@ class Renderer {
 		// Layer control.
 		this.layers = [];
 
+		// Camera.
+		this.camera = {
+			x: 0,
+			y: 0,
+		};
+
 		// Resize setup.
 		window.addEventListener("resize", this.__resizeCanvas.bind(this));
 		this.__resizeCanvas();
@@ -120,28 +126,13 @@ class Renderer {
 	 * @param {string} name - The name of the layer.
 	 * @param {function} loopFunction - The rendering function to call every frame for this layer.
 	 * @param {number} layering - Where on the stack to put this layer. 1 being first, -1 being last.
-	 *
-	 *
-	 * Render loops should follow this basic three-step method:
-	 *
-	 * 1. Input
-	 *    - Any user input or AI processing.
-	 *
-	 * 2. Logic
-	 *    - Any game logic. (physics, generation, etc)
-	 *
-	 * 3. Render
-	 *
-	 *    - Clear the screen.
-	 *    - Draw to the screen.
-	 *
 	 */
 	createLayer(name, layering = 1) {
 		const layer = new Layer(name);
 
 		if (layering === 1) {
 			this.layers.push(layer);
-		} else if (layering === 0) {
+		} else if (layering === -1) {
 			this.layers.unshift(layer);
 		} else {
 			throw new Error(`Layering (${layering}) is invalid.`);
@@ -220,9 +211,11 @@ class Renderer {
 }
 
 const rend = new Renderer();
+const canvas = rend.canvas;
 const ctx = rend.ctx;
+const camera = rend.camera;
 
 // Try exporting if we are in node. (used for development only)
 try {
-	module.exports = { rend, ctx, Layer };
+	module.exports = { rend, canvas, ctx, camera, Layer };
 } catch {}
