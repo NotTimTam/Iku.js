@@ -2,11 +2,12 @@
 
 try {
 	const { rend, ctx, canvas } = require("../Iku/render");
-	const { Sprite, Text, keys, inp } = require("../Iku/game");
+	const { Sprite, keys, inp } = require("../Iku/game");
 } catch {}
 
+const secondaryLayer = rend.createLayer("secondLayer");
+const topLayer = rend.createLayer("toplayer");
 const mainLayer = rend.createLayer("mainLayer");
-const secondaryLayer = rend.createLayer("mainLayer", -1);
 
 class Cube extends Sprite {
 	constructor(x, y, color = "tomato", initSpeedChange = 1) {
@@ -66,31 +67,38 @@ for (let y = 0; y < canvas.height / 64; y += 1) {
 	e++;
 }
 
-const text = new Text(
-	0,
-	64,
-	" ",
-	"purple",
-	"48px Segoe UI",
-	null,
-	"bold",
-	"left",
-	"middle",
-	canvas.width
-);
-addEventListener("keypress", (e) => {
-	let letterArray =
-		`1234567890-=!@#$%^&*()_+?/>.<,"':;[{]}\\|~\`abcdefghijklmnopqrstuvwxyz `.split(
-			""
-		);
-	for (let letter of letterArray) {
-		if (e.key == letter) {
-			text.text += letter;
-		}
+const player = new Cube(canvas.width / 2, canvas.height / 2, "purple", 0);
+player.speed = 10;
+player.input = function () {
+	if (keys.ArrowUp) {
+		this.y -= this.speed;
 	}
-	if (e.key == "Enter") {
-		text.text = " ";
-	}
-});
 
-mainLayer.addPrimitive(text);
+	if (keys.ArrowDown) {
+		this.y += this.speed;
+	}
+
+	if (keys.ArrowLeft) {
+		this.x -= this.speed;
+	}
+
+	if (keys.ArrowRight) {
+		this.x += this.speed;
+	}
+};
+player.logic = function () {
+	if (this.x > ctx.canvas.width - 1 + this.size) {
+		this.x = 1 - this.size;
+	}
+	if (this.x < 1 - this.size) {
+		this.x = ctx.canvas.width - 1 + this.size;
+	}
+
+	if (this.y > ctx.canvas.height - 1 + this.size) {
+		this.y = 1 - this.size;
+	}
+	if (this.y < 1 - this.size) {
+		this.y = ctx.canvas.height - 1 + this.size;
+	}
+};
+topLayer.addPrimitive(player);

@@ -85,7 +85,11 @@ class Renderer {
 	constructor() {
 		// Context and canvas gen.
 		this.canvas = document.createElement("canvas");
-		this.ctx = this.canvas.getContext("2d");
+		this.ctx = this.canvas.getContext("2d", {
+			alpha: true,
+			willReadFrequently: true,
+			powerPreference: "high-performance",
+		});
 		document.body.appendChild(this.canvas);
 
 		// Styling gen.
