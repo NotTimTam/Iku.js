@@ -123,7 +123,7 @@ class Primitive {
 	 */
 
 	/**
-	 * Binds and calls the loop() function. **Under no circumstances should this be overwritten.** Override loop() instead.
+	 * Binds and calls the input, logic, and render functions of this primitive. **Under no circumstances should this be overwritten.** Override input(), logic(), and render() instead.
 	 */
 	__loop() {
 		if (this.input) {
@@ -158,6 +158,34 @@ class Primitive {
 
 // Primitive.prototype.loop = function () {};
 
+// SPRITE BEHAVIOURS
+class Behaviour {
+	/**
+	 * A simple behaviour with its own input(), logic(), and render() functions.
+	 * @param {Sprite} sprite - The sprite to bind this behaviour to. If not bound, the behaviour will not be called on the right object.
+	 */
+	constructor(sprite) {
+		// If the given sprite doesn't exist.
+		if (!sprite) {
+			throw new Error("Given sprite is not a valid sprite.");
+			return;
+		}
+
+		this.sprite = sprite;
+		this.sprite.behaviours.push(this);
+	}
+}
+class topDownController extends Behaviour {
+	/**
+	 * Adds top-down input functionality to a sprite.
+	 * @param {Sprite} sprite - The sprite to bind this behaviour to. If not bound, the behaviour will not be called on the right object.
+	 */
+	constructor(sprite) {
+		super(sprite);
+	}
+}
+
+// Sprite
 class Sprite extends Primitive {
 	/**
 	 * A primitive with behaviours.
@@ -169,8 +197,27 @@ class Sprite extends Primitive {
 
 		this.x = x;
 		this.y = y;
+		this.behaviours = [];
+	}
+
+	/**
+	 * Binds and calls the input, logic, and render functions of this primitive and all of its behaviours. **Under no circumstances should this be overwritten.** Override input(), logic(), and render() instead.
+	 */
+	__loop() {
+		if (this.input) {
+			this.input.call(this);
+		}
+
+		if (this.logic) {
+			this.logic.call(this);
+		}
+
+		if (this.render) {
+			this.render.call(this);
+		}
 	}
 }
+
 class Text extends Primitive {
 	/**
 	 * A primitive that displays text to the screen.
@@ -251,12 +298,20 @@ class Text extends Primitive {
 		}
 	}
 }
+
 class TiledBackground extends Primitive {
+	/**
+	 * (**unimplemented**)
+	 */
 	constructor() {
 		super();
 	}
 }
+
 class Tilemap extends Primitive {
+	/**
+	 * (**unimplemented**)
+	 */
 	constructor() {
 		super();
 	}

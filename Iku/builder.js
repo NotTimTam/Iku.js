@@ -17,14 +17,15 @@ class Builder {
 	/**
 	 * Builds the game with your settings and code.
 	 * @param {object} settings - The settings used to create the game.
+	 * @param {string} outputDirectory - The folder to dump the *"Iku.js Export"* folder into.
 	 */
-	build(settings) {
+	build(settings, outputDirectory = "./") {
 		console.log("[builder.js]   0% - Building");
 		if (!settings) {
 			throw new Error("No settings given to build function.");
 		}
 
-		const DIR = "./IkuExport/";
+		const DIR = `${outputDirectory}/Iku.js Export/`;
 
 		// Create directory.
 		console.log("[builder.js]   2% - Creating directory");
