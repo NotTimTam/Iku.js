@@ -158,6 +158,195 @@ class Primitive {
 
 // Primitive.prototype.loop = function () {};
 
+// SPRITE BEHAVIOURS
+class Behaviour {
+	/**
+	 * A simple behaviour with its own input(), logic(), and render() functions.
+	 * @param {Sprite} sprite - The sprite to bind this behaviour to. If not bound, the behaviour will not be called on the right object.
+	 */
+	constructor(sprite) {
+		// If the given sprite doesn't exist.
+		if (!sprite || !sprite.behaviours) {
+			throw new Error("Given sprite is not a valid sprite.");
+			return;
+		}
+
+		this.sprite = sprite;
+
+		this.sprite.behaviours.push(this);
+	}
+
+	/**
+	 * Binds and calls the input, logic, and render functions of this behaviour. **Under no circumstances should this be overwritten.** Override input(), logic(), and render() instead.
+	 */
+	__loop() {
+		if (this.input) {
+			this.input.call(this);
+		}
+
+		if (this.logic) {
+			this.logic.call(this);
+		}
+
+		if (this.render) {
+			this.render.call(this);
+		}
+	}
+}
+class topDownController extends Behaviour {
+	/**
+	 * Adds top-down input functionality to a sprite.
+	 * @param {Sprite} sprite - The sprite to bind this behaviour to. If not bound, the behaviour will not be called on the right object.
+	 * @param {number} maxSpeed - The maximum velocity the sprite can attain in any direction.
+	 * @param {number} accel - The rate at which the sprite accelerates. A percentage from 0 (doesn't accelerate) to 100 (instantly attains maxSpeed)
+	 * @param {number} decel - The rate at which the sprite decelerates. A percentage from 0 (doesn't decelerate) to 100 (instantly stops moving)
+	 * @param {{up: string|[string], down: string|[string], left: string|[string], right: string|[string]}} inputs - The keys that activate movement on the sprite. Can either be set to a single string equalling the event.key return on a "keydown" event, or an array of permitted keys.
+	 */
+	constructor(
+		sprite,
+		maxSpeed = 10,
+		accel = 75,
+		decel = 100,
+		inputs = {
+			up: ["ArrowUp"],
+			down: ["ArrowDown"],
+			left: ["ArrowLeft"],
+			right: ["ArrowRight"],
+		}
+	) {
+		// Apply all general behaviour settings.
+		super(sprite);
+
+		// Physics.
+		this.xVel = 0;
+		this.yVel = 0;
+
+		// Inputs.
+
+		// Check if input properties exist.
+		let defaultInputs = {
+			up: ["ArrowUp"],
+			down: ["ArrowDown"],
+			left: ["ArrowLeft"],
+			right: ["ArrowRight"],
+		};
+		if (!inputs.up) inputs.up = defaultInputs.up;
+		if (!inputs.down) inputs.down = defaultInputs.down;
+		if (!inputs.left) inputs.left = defaultInputs.left;
+		if (!inputs.right) inputs.right = defaultInputs.right;
+
+		// Ensure that input properties are arrays.
+		if (typeof inputs.up === "string") inputs.up = [inputs.up];
+		if (typeof inputs.down === "string") inputs.down = [inputs.down];
+		if (typeof inputs.left === "string") inputs.left = [inputs.left];
+		if (typeof inputs.right === "string") inputs.right = [inputs.right];
+
+		this.inputs = inputs;
+
+		// Configure acceleration and deceleration.
+		if (accel > 100) accel = 100;
+		if (accel < 0) accel = 0;
+		this.accel = accel / 100;
+
+		if (decel > 100) decel = 100;
+		if (decel < 0) decel = 0;
+		this.decel = decel / 100;
+
+		this.maxSpeed = maxSpeed;
+	}
+
+	/**
+	 * Checks if any inputs are down and also runs a provided callback function if any are.
+	 * @param {[string]} inputArray - The inputs to check against. An array of (event.key in onkeydown listeners) values.
+	 * @param {function} callback - An optional callback function to run.
+	 * @returns {boolean} keyDown - Whether or not any keys are down.
+	 */
+	__checkInputInDir(inputArray, callback) {
+		for (let input of inputArray) {
+			if (keys[input]) {
+				if (callback) callback();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Moves the sprite based on its physics behaviours.
+	 */
+	input() {
+		// Apply movement to sprite based on permitted inputs.
+
+		//! UP
+		this.__checkInputInDir(this.inputs.up, () => {
+			this.yVel -= this.maxSpeed * this.accel;
+		});
+
+		//! DOWN
+		this.__checkInputInDir(this.inputs.down, () => {
+			this.yVel += this.maxSpeed * this.accel;
+		});
+
+		//! LEFT
+		this.__checkInputInDir(this.inputs.left, () => {
+			this.xVel -= this.maxSpeed * this.accel;
+		});
+
+		//! RIGHT
+		this.__checkInputInDir(this.inputs.right, () => {
+			this.xVel += this.maxSpeed * this.accel;
+		});
+
+		// Decelerate if force is not applied.
+		if (
+			!this.__checkInputInDir(this.inputs.left) &&
+			!this.__checkInputInDir(this.inputs.right)
+		) {
+			if (this.xVel > 0) {
+				this.xVel -= this.xVel * this.decel;
+			} else if (this.xVel < 0) {
+				this.xVel += -this.xVel * this.decel;
+			}
+		}
+		if (
+			!this.__checkInputInDir(this.inputs.up) &&
+			!this.__checkInputInDir(this.inputs.down)
+		) {
+			if (this.yVel > 0) {
+				this.yVel -= this.yVel * this.decel;
+			} else if (this.yVel < 0) {
+				this.yVel += -this.yVel * this.decel;
+			}
+		}
+	}
+
+	/**
+	 * Physics changes applied after input to the sprite.
+	 */
+	logic() {
+		// Check speeds against positive maxes.
+		if (this.xVel > this.maxSpeed) {
+			this.xVel = this.maxSpeed;
+		}
+		if (this.yVel > this.maxSpeed) {
+			this.yVel = this.maxSpeed;
+		}
+
+		// Check speeds against negative maxes.
+		if (this.xVel < -this.maxSpeed) {
+			this.xVel = -this.maxSpeed;
+		}
+		if (this.yVel < -this.maxSpeed) {
+			this.yVel = -this.maxSpeed;
+		}
+
+		// Apply positional changes.
+		this.sprite.x += this.xVel;
+		this.sprite.y += this.yVel;
+	}
+}
+
+// Sprite
 class Sprite extends Primitive {
 	/**
 	 * A primitive with behaviours.
@@ -176,6 +365,11 @@ class Sprite extends Primitive {
 	 * Binds and calls the input, logic, and render functions of this primitive and all of its behaviours. **Under no circumstances should this be overwritten.** Override input(), logic(), and render() instead.
 	 */
 	__loop() {
+		// Call all behaviour __loops().
+		for (let behaviour of this.behaviours) {
+			behaviour.__loop();
+		}
+
 		if (this.input) {
 			this.input.call(this);
 		}
@@ -292,14 +486,23 @@ class Tilemap extends Primitive {
 // Try exporting if we are in node. (used for development only)
 try {
 	module.exports = {
+		// Simple vars/functions.
 		uuid,
 		__warn,
 		debug,
+
+		// Primitives.
 		Primitive,
 		Sprite,
 		Text,
 		TiledBackground,
 		Tilemap,
+
+		// Behaviours.
+		Behaviour,
+		topDownController,
+
+		// Global Objects.
 		inp,
 		keys,
 		mouse,

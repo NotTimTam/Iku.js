@@ -2,7 +2,7 @@
 
 try {
 	const { rend, ctx, canvas } = require("../Iku/render");
-	const { Sprite, keys, inp } = require("../Iku/game");
+	const { Sprite, topDownController, keys, inp } = require("../Iku/game");
 } catch {}
 
 const secondaryLayer = rend.createLayer("secondLayer");
@@ -68,24 +68,14 @@ for (let y = 0; y < canvas.height / 64; y += 1) {
 }
 
 const player = new Cube(canvas.width / 2, canvas.height / 2, "purple", 0);
-player.speed = 10;
-player.input = function () {
-	if (keys.ArrowUp) {
-		this.y -= this.speed;
-	}
 
-	if (keys.ArrowDown) {
-		this.y += this.speed;
-	}
-
-	if (keys.ArrowLeft) {
-		this.x -= this.speed;
-	}
-
-	if (keys.ArrowRight) {
-		this.x += this.speed;
-	}
-};
+player.input = () => {};
+new topDownController(player, 10, 100, 20, {
+	up: ["w", " "],
+	down: "s",
+	left: "a",
+	right: "d",
+});
 player.logic = function () {
 	if (this.x > ctx.canvas.width - 1 + this.size) {
 		this.x = 1 - this.size;
