@@ -345,98 +345,6 @@ class topDownController extends Behaviour {
 		this.sprite.y += this.yVel;
 	}
 }
-class tileBasedController extends topDownController {
-	/**
-	 * Adds top-down input functionality to a sprite.
-	 * @param {Sprite} sprite - The sprite to bind this behaviour to. If not bound, the behaviour will not be called on the right object.
-	 * @param {number} tileSize - The size of each tile, or how far to move each keypress.
-	 * @param {{up: string|[string], down: string|[string], left: string|[string], right: string|[string]}} inputs - The keys that activate movement on the sprite. Can either be set to a single string equalling the event.key return on a "keydown" event, or an array of permitted keys.
-	 */
-	constructor(
-		sprite,
-		tileSize = 10,
-		inputs = {
-			up: ["ArrowUp"],
-			down: ["ArrowDown"],
-			left: ["ArrowLeft"],
-			right: ["ArrowRight"],
-		}
-	) {
-		const maxSpeed = tileSize;
-		const accel = 100;
-		const decel = 100;
-
-		super(sprite, maxSpeed, accel, decel, inputs);
-
-		window.addEventListener("keypress", this.input);
-
-		throw new Error("NOT FULLY IMPLEMENTED");
-	}
-
-	/**
-	 * Checks if any inputs are down and also runs a provided callback function if any are.
-	 * @param {[string]} inputArray - The inputs to check against. An array of (event.key in onkeydown listeners) values.
-	 * @param {string} checkAgainst - The event key value to check against.
-	 * @param {function} callback - An optional callback function to run.
-	 * @returns {boolean} keyDown - Whether or not any keys are down.
-	 */
-	__checkInputInDir(inputArray, checkAgainst, callback) {
-		for (let input of inputArray) {
-			if (checkAgainst == input) {
-				if (callback) callback();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Binds and calls **ONLY** the logic and render functions of this behaviour. **Under no circumstances should this be overwritten.** Override logic(), and render() instead.
-	 */
-	__loop() {
-		if (this.logic) {
-			this.logic.call(this);
-		}
-
-		if (this.render) {
-			this.render.call(this);
-		}
-	}
-
-	/**
-	 * Moves the sprite based on its physics behaviours.
-	 */
-	input(e) {
-		this.__checkInputInDir(this.inputs.up, e.key, () => {
-			this.sprite.x -= this.maxSpeed;
-		});
-	}
-
-	/**
-	 * Physics changes applied after input to the sprite.
-	 */
-	logic() {
-		// Check speeds against positive maxes.
-		if (this.xVel > this.maxSpeed) {
-			this.xVel = this.maxSpeed;
-		}
-		if (this.yVel > this.maxSpeed) {
-			this.yVel = this.maxSpeed;
-		}
-
-		// Check speeds against negative maxes.
-		if (this.xVel < -this.maxSpeed) {
-			this.xVel = -this.maxSpeed;
-		}
-		if (this.yVel < -this.maxSpeed) {
-			this.yVel = -this.maxSpeed;
-		}
-
-		// Apply positional changes.
-		this.sprite.x += this.xVel;
-		this.sprite.y += this.yVel;
-	}
-}
 
 // Sprite
 class Sprite extends Primitive {
@@ -593,7 +501,6 @@ try {
 		// Behaviours.
 		Behaviour,
 		topDownController,
-		tileBasedController,
 
 		// Global Objects.
 		inp,
