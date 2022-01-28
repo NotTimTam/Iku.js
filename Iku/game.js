@@ -345,6 +345,17 @@ class topDownController extends Behaviour {
 		this.sprite.y += this.yVel;
 	}
 }
+class rayCaster extends Behaviour {
+	/**
+	 * Allows for raycasting from a sprite. Raycasting only happens on one layer unless others are specified.
+	 * @param {Sprite} sprite - The sprite to bind this behaviour to. If not bound, the behaviour will not be called on the right object.
+	 * @param {number} quality - The quality of the raycast, or how many pixels it moves each step. By default should be 1.
+	 */
+	constructor(sprite, quality = 1) {
+		super(sprite);
+		this.quality = quality;
+	}
+}
 
 // Sprite
 class Sprite extends Primitive {
@@ -501,6 +512,7 @@ try {
 		// Behaviours.
 		Behaviour,
 		topDownController,
+		rayCaster,
 
 		// Global Objects.
 		inp,

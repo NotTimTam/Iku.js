@@ -1,8 +1,10 @@
 "use strict";
+
 console.log("render.js loaded...");
 
 // Try importing if we are in node. (used for development only)
 try {
+	const { Cartesian2, math, Vector2, Angle } = require("./math");
 	const {
 		uuid,
 		__warn,
@@ -18,25 +20,89 @@ try {
 Render objects and methods.
 */
 
+class __Camera {
+	/**
+	 * The camera by which all layers and objects are positioned. This is a rendering object and should not be overwritten unless you know what you are doing.
+	 *
+	 * Do not modify the camera's x or y positioning, instead modify targetX and targetY.
+	 * @param {Cartesian2} position - The initial x and y positions of the camera.
+	 * @param {boolean} smoothing - Whether or not to smooth camera movement.
+	 * @param {number} smoothingAmount - The amount by which to segment movement. Higher numbers mean slower camera. 12 is a decent value.
+	 */
+	constructor(position, smoothing = true, smoothingAmount = 12) {
+		this.x = position.x;
+		this.y = position.y;
+
+		this.targetX = this.x;
+		this.targetY = this.y;
+
+		this.smoothing = smoothing;
+		this.smoothingAmount = smoothingAmount;
+	}
+
+	/**
+	 * Moves the camera to its position on each frame.
+	 */
+	__logic() {
+		if (!this.smoothing) {
+			// Regular camera movement.
+			this.x = this.targetX;
+			this.y = this.targetY;
+		} else {
+			// Smooth camera movement.
+			const nextPos = math.cartesian2(
+				new Vector2(
+					math.angle(
+						new Cartesian2(this.targetX, this.targetY),
+						new Cartesian2(this.x, this.y)
+					),
+
+					math.distance(
+						new Cartesian2(this.targetX, this.targetY),
+						new Cartesian2(this.x, this.y)
+					) / this.smoothingAmount
+				)
+			);
+
+			this.x += nextPos.x;
+			this.y += nextPos.y;
+		}
+	}
+}
+
 class Layer {
 	/**
 	 * A layer. Contains objects that render and run in its own loop.
 	 * @param {string} name - The name to identify the layer by.
+	 * @param {number} layering - Where on the stack to put this layer. 1 being first, -1 being last.
 	 */
-	constructor(name) {
+	constructor(name, layering = 1) {
 		this.name = name;
 		this.id = uuid();
-
 		this.primitives = [];
+
+		if (layering === 1) {
+			rend.layers.push(this);
+		} else if (layering === -1) {
+			rend.layers.unshift(this);
+		} else {
+			throw new Error(`Layering (${layering}) is invalid.`);
+		}
 	}
 
 	/**
 	 * The function called every frame on this layer.
 	 */
 	__loop() {
+		// Run primitives.
+		ctx.beginPath();
+		ctx.save();
+		ctx.translate(-camera.x, -camera.y);
 		for (let primitive of this.primitives) {
 			primitive.__loop();
 		}
+		ctx.restore();
+		ctx.closePath();
 	}
 
 	/**
@@ -110,10 +176,7 @@ class Renderer {
 		this.layers = [];
 
 		// Camera.
-		this.camera = {
-			x: 0,
-			y: 0,
-		};
+		this.camera = new __Camera(new Cartesian2(0, 0));
 
 		// Resize setup.
 		window.addEventListener("resize", this.__resizeCanvas.bind(this));
@@ -124,26 +187,6 @@ class Renderer {
 	}
 
 	// Layer Functions
-
-	/**
-	 * Creates a new render layer.
-	 * @param {string} name - The name of the layer.
-	 * @param {function} loopFunction - The rendering function to call every frame for this layer.
-	 * @param {number} layering - Where on the stack to put this layer. 1 being first, -1 being last.
-	 */
-	createLayer(name, layering = 1) {
-		const layer = new Layer(name);
-
-		if (layering === 1) {
-			this.layers.push(layer);
-		} else if (layering === -1) {
-			this.layers.unshift(layer);
-		} else {
-			throw new Error(`Layering (${layering}) is invalid.`);
-		}
-
-		return layer;
-	}
 
 	/**
 	 * Removes a layer from the stack via its ID.
@@ -204,7 +247,16 @@ class Renderer {
 	 * The main render loop. Called every animation frame, runs code for all layers and should not be overwritten.
 	 */
 	__render() {
+		// Logic
+		this.camera.__logic();
+
+		// Render
 		this.clearScreen();
+
+		ctx.beginPath();
+		ctx.fillStyle = "red";
+		ctx.fillRect(0 - this.camera.x, 0 - this.camera.y, 15, 15);
+		ctx.closePath();
 
 		for (let layer of this.layers) {
 			layer.__loop();

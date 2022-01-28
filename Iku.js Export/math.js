@@ -177,12 +177,33 @@ class math {
 	}
 
 	/**
+	 * Creates a random integer between two values.
 	 * @param {number} min - The minimum value.
 	 * @param {number} max - The maximum value.
 	 * @returns {number} - a random integer between two values.
 	 */
 	static range(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	/**
+	 * Calculates the angle from one position to another.
+	 * @param {Cartesian2} pos1 - The position to send the angle to.
+	 * @param {Cartesian2} pos2 - The position to send the angle from.
+	 * @returns {Angle} - The angle between the two Cartesian2 points.
+	 */
+	static angle(pos1, pos2) {
+		return this.deg(Math.atan2(pos1.y - pos2.y, pos1.x - pos2.x));
+	}
+
+	/**
+	 * Calculates the distance between two positions.
+	 * @param {Cartesian2} pos1 - The first position to check.
+	 * @param {Cartesian3} pos2 - The second position to check.
+	 * @returns {number} - The distance between the two objects.
+	 */
+	static distance(pos1, pos2) {
+		return Math.sqrt((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2);
 	}
 
 	/**
@@ -252,5 +273,4 @@ try {
 		BoundingBox3D,
 		math,
 	};
-} catch {
-}
+} catch {}
