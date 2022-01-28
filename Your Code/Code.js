@@ -1,7 +1,7 @@
 "use strict";
 
 try {
-	const { rend, ctx, canvas, Layer } = require("../Iku/render");
+	const { rend, ctx, canvas, Layer, camera } = require("../Iku/render");
 	const {
 		Sprite,
 		tileBasedController,
@@ -62,8 +62,6 @@ const player = new Cube(canvas.width / 2, canvas.height / 2, "purple", 0);
 
 player.input = () => {};
 new topDownController(player, 10, 100, 100);
-player.logic = function () {
-	rend.camera.targetX = this.x - ctx.canvas.width / 2;
-	rend.camera.targetY = this.y - ctx.canvas.height / 2;
-};
+camera.setTarget(player, true);
+player.logic = function () {};
 layer.addPrimitive(player);

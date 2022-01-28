@@ -38,12 +38,25 @@ class __Camera {
 
 		this.smoothing = smoothing;
 		this.smoothingAmount = smoothingAmount;
+
+		// Camera target data.
+		this.lockedTarget = false;
+		this.centerScreenOnTarget = true;
 	}
 
 	/**
 	 * Moves the camera to its position on each frame.
 	 */
 	__logic() {
+		if (this.target) {
+			this.targetX = this.centerScreenOnTarget
+				? this.target.x - ctx.canvas.width / 2
+				: this.target.x;
+			this.targetY = this.centerScreenOnTarget
+				? this.target.y - ctx.canvas.height / 2
+				: this.target.y;
+		}
+
 		if (!this.smoothing) {
 			// Regular camera movement.
 			this.x = this.targetX;
@@ -67,6 +80,26 @@ class __Camera {
 			this.x += nextPos.x;
 			this.y += nextPos.y;
 		}
+	}
+
+	/**
+	 * Picks a permanent target for the camera to follow. Unset with <camera.unsetTarget()>.
+	 * @param {Sprite} sprite - Sets the camera's lock-on target.
+	 * @param {boolean} centerScreen - Whether or not to target at the top left (false) or center (true) of the camera.
+	 */
+	setTarget(sprite, centerScreen = true) {
+		this.lockedTarget = true;
+		this.target = sprite;
+		this.centerScreenOnTarget = centerScreen;
+	}
+
+	/**
+	 * Unsets the camera's target and goes back to manual camera controls.
+	 */
+	unsetTarget() {
+		this.lockedTarget = false;
+		this.target = null;
+		this.centerScreenOnTarget = false;
 	}
 }
 
