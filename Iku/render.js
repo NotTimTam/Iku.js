@@ -109,10 +109,18 @@ class Layer {
 	 * @param {string} name - The name to identify the layer by.
 	 * @param {number} layering - Where on the stack to put this layer. 1 being first, -1 being last.
 	 */
-	constructor(name, layering = 1) {
+	constructor(name, layering = 1, parallax = new Cartesian2(100, 100)) {
 		this.name = name;
 		this.id = uuid();
 		this.primitives = [];
+
+		if (parallax.x < 0) parallax.x = 0;
+		else if (parallax.x > 100) parallax.x = 100;
+		if (parallax.y < 0) parallax.y = 0;
+		else if (parallax.y > 100) parallax.y = 100;
+		parallax.x /= 100;
+		parallax.y /= 100;
+		this.parallax = parallax;
 
 		if (layering === 1) {
 			rend.layers.push(this);
@@ -130,7 +138,7 @@ class Layer {
 		// Run primitives.
 		ctx.beginPath();
 		ctx.save();
-		ctx.translate(-camera.x, -camera.y);
+		ctx.translate(-camera.x * this.parallax.x, -camera.y * this.parallax.y);
 		for (let primitive of this.primitives) {
 			primitive.__loop();
 		}

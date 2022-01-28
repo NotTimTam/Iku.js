@@ -8,8 +8,21 @@ try {
 		keys,
 		inp,
 		topDownController,
+		Primitive,
 	} = require("../Iku/game");
+	const { Cartesian2 } = require("../Iku/math");
 } catch {}
+
+const layer2 = new Layer("dot", 1, new Cartesian2(50, 50));
+
+const dot = new Sprite(0, 0);
+dot.render = function () {
+	ctx.beginPath();
+	ctx.fillStyle = "black";
+	ctx.fillRect(this.x, this.y, 25, 25);
+	ctx.closePath();
+};
+layer2.addPrimitive(dot);
 
 const layer = new Layer("hehehe");
 
