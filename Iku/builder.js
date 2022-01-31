@@ -2,10 +2,28 @@
 console.log("builder.js loaded...");
 
 const fs = require("fs-extra");
+const path = require("path");
 
 /*
 Builds your game.
 */
+
+function __walk(dir) {
+	var results = [];
+	var list = fs.readdirSync(dir);
+	list.forEach(function (file) {
+		file = dir + "/" + file;
+		var stat = fs.statSync(file);
+		if (stat && stat.isDirectory()) {
+			/* Recurse into a subdirectory */
+			results = results.concat(__walk(file));
+		} else {
+			/* Is a file */
+			results.push(file);
+		}
+	});
+	return results;
+}
 
 class Builder {
 	constructor() {
@@ -54,15 +72,22 @@ class Builder {
 		// Copy all the users code files.
 		console.log("[builder.js]  30% - Copying user code files");
 		let customCodeImports = "";
-		if (settings.code) {
-			for (let filePath of settings.code) {
-				customCodeImports += `<script src="./${filePath}"></script>`;
-				fs.copyFile("./" + filePath, DIR + "/" + filePath, (err) => {
-					if (err) {
-						console.warn(err);
-					}
-				});
-			}
+		if (settings.files) {
+			fs.copySync(settings.files, DIR + "/" + settings.files);
+
+			// Create HTML import tags for all the files.
+			__walk(settings.files).forEach((filepath) => {
+				customCodeImports += `<script src="${filepath}"></script>`;
+			});
+
+			// for (let filePath of settings.code) {
+			// 	customCodeImports += `<script src="./${filePath}"></script>`;
+			// 	fs.copyFile("./" + filePath, DIR + "/" + filePath, (err) => {
+			// 		if (err) {
+			// 			console.warn(err);
+			// 		}
+			// 	});
+			// }
 		}
 
 		// Write the html file.

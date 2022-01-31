@@ -2,5 +2,5 @@
 	"name": "Untitled Game",
 	"pixelPerfect": false,
 
-	"code": ["Code.js"]
+	"files": "./code"
 }

@@ -1,7 +1,7 @@
 "use strict";
 
 try {
-	const { rend, ctx, canvas, Layer, camera } = require("../Iku/render");
+	const { rend, ctx, canvas, Layer, camera } = require("../../Iku/render");
 	const {
 		Sprite,
 		keys,
@@ -10,8 +10,8 @@ try {
 		Primitive,
 		Text,
 		Solid,
-	} = require("../Iku/game");
-	const { Cartesian2, BoundingBox2D } = require("../Iku/math");
+	} = require("../../Iku/game");
+	const { Cartesian2, BoundingBox2D } = require("../../Iku/math");
 } catch {}
 
 const layer = new Layer("layer");
