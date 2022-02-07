@@ -1,2 +1,3 @@
 # Iku.js
 
+This project is in alpha. The code is buggy and unfinished. Use at your own risk...
